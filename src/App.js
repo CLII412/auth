@@ -1,25 +1,44 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect,Suspense } from "react";
+import ReactDOM from "react-dom/client";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+} from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import './utils/i18next';
+import axios from "axios";
+import SignUpContainer from "./components/signup/signup.container";
+import {useDispatch} from "react-redux";
+import { setLang } from "./store/lang/langAction";
+import SignUpPage from "./pages/signup/signupPage";
+import AuthSuccessfully from "./pages/authSuccessfully";
+
 
 function App() {
+  const {i18n}=useTranslation()
+  const dispatch=useDispatch();
+  useEffect(() =>{
+    axios.get('https://ipapi.co/json/').then((response) => {
+    let data = response.data;
+    dispatch(setLang(data.country_name==='Ukraine'?'ua':'en'))
+    i18n.changeLanguage(data.country_name==='Ukraine'?'ua':'en')
+  }).catch((error) => {
+      console.log(error);
+  });
+  },[])
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+
+      <Suspense fallback="loading">
+        <BrowserRouter>
+          <Routes>
+            <Route path="/signup" element={<SignUpPage />}/>
+            <Route path="/auth_successfully" element={<AuthSuccessfully />}/>
+          </Routes>
+        </BrowserRouter>
+      </Suspense>
+
+
   );
 }
-
 export default App;
